@@ -1,0 +1,15 @@
+version: '3'
+services:
+  phpipam-beta:
+    image: cent7-phpipam:latest
+    container_name: phpipam-beta
+    network_mode: bridge
+    environment:
+      - DB_PHPIPAM_HOST=172.22.2.11
+      - DB_PHPIPAM_USER=user_phpipam
+      - DB_PHPIPAM_PASSWORD=P@ssw0rd#1
+      - DB_PHPIPAM_NAME=db_phpipam
+    ports:
+      - 8083:80
+    volumes:
+      - ./phpipam:/var/www/html
