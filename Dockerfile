@@ -8,7 +8,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Repositories and packages
 RUN yum -y install epel-release && \
-    rpm -Uvh https://dl.iuscommunity.org/pub/ius/stable/CentOS/7/x86_64/ius-release-1.0-14.ius.centos7.noarch.rpm
+    curl -s https://setup.ius.io/ | bash
 
 RUN yum -y update && \
     yum -y install \
@@ -31,6 +31,39 @@ RUN yum -y update && \
     yum clean all
 
 # Set PHP timezone
+RUN sed -i "s/^;date.timezone =$/date.timezone = \"Asia\/Phnom_Penh\"/" /etc/php.ini
+
+# Secure Apache server
+## Disable CentOS Welcome Page
+RUN sed -i 's/^\([^#]\)/#\1/g' /etc/httpd/conf.d/welcome.conf
+
+## Turn off directory listing, Disable Apache's FollowSymLinks, Turn off server-side includes (SSI) and CGI execution
+RUN cp /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.orig && \
+	sed -i 's/^\([^#]*\)Options Indexes FollowSymLinks/\1Options -Indexes +SymLinksifOwnerMatch -ExecCGI -Includes/g' /etc/httpd/conf/httpd.conf
+
+## Hide the Apache version, secure from clickjacking attacks, disable ETag, secure from XSS attacks and protect cookies with HTTPOnly flag
+RUN echo $'\n\
+ServerSignature Off\n\
+ServerTokens Prod\n\
+Header append X-FRAME-OPTIONS "SAMEORIGIN"\n\
+FileETag None\n\
+<IfModule mod_headers.c>\n\
+    Header set X-XSS-Protection "1; mode=block"\n\
+</IfModule>\n'\
+>> /etc/httpd/conf/httpd.conf
+
+# Disable unnecessary modules in /etc/httpd/conf.modules.d/00-base.conf
+RUN cp /etc/httpd/conf.modules.d/00-base.conf /etc/httpd/conf.modules.d/00-base.conf.bak && \
+	sed -i '/mod_cache.so/ s/^/#/' /etc/httpd/conf.modules.d/00-base.conf && \
+	sed -i '/mod_cache_disk.so/ s/^/#/' /etc/httpd/conf.modules.d/00-base.conf && \
+	sed -i '/mod_substitute.so/ s/^/#/' /etc/httpd/conf.modules.d/00-base.conf && \
+	sed -i '/mod_userdir.so/ s/^/#/' /etc/httpd/conf.modules.d/00-base.conf
+
+# Disable everything in /etc/httpd/conf.modules.d/00-dav.conf, 00-lua.conf, 00-proxy.conf and 01-cgi.conf
+RUN sed -i 's/^/#/g' /etc/httpd/conf.modules.d/00-dav.conf && \
+	sed -i 's/^/#/g' /etc/httpd/conf.modules.d/00-lua.conf && \
+	sed -i 's/^/#/g' /etc/httpd/conf.modules.d/00-proxy.conf && \
+	sed -i 's/^/#/g' /etc/httpd/conf.modules.d/01-cgi.conf
 
 # Download phpipam
 RUN mkdir /usr/src/phpipam && \

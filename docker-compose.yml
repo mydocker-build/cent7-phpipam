@@ -1,15 +1,18 @@
 version: '3'
 services:
-  phpipam-beta:
-    image: cent7-phpipam:latest
-    container_name: phpipam-beta
+  phpipam:
+    image: "cent7-phpipam:latest"
+    restart: always
+    container_name: phpipam.sca-domain.com
+    hostname: phpipam
+    domainname: sca-domain.com
     network_mode: bridge
     environment:
-      - DB_PHPIPAM_HOST=172.22.2.11
+      - DB_PHPIPAM_HOST=192.168.99.252
       - DB_PHPIPAM_USER=user_phpipam
-      - DB_PHPIPAM_PASSWORD=P@ssw0rd#1
+      - DB_PHPIPAM_PASSWORD=UwKF1Tx"G#
       - DB_PHPIPAM_NAME=db_phpipam
     ports:
-      - 8083:80
+      - 8081:80
     volumes:
-      - ./phpipam:/var/www/html
+      - /srv/docker_data/phpipam.sca-domain.com:/var/www/html
