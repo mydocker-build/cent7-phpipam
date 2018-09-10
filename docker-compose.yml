@@ -1,18 +1,13 @@
 version: '3'
 services:
   phpipam:
-    image: "cent7-phpipam:latest"
+    image: "cent7-phpipam:1.3.2"
     restart: always
-    container_name: phpipam.sca-domain.com
+    container_name: phpipam
     hostname: phpipam
-    domainname: sca-domain.com
+    domainname: prosethsolutions.lab 
     network_mode: bridge
-    environment:
-      - DB_PHPIPAM_HOST=192.168.99.252
-      - DB_PHPIPAM_USER=user_phpipam
-      - DB_PHPIPAM_PASSWORD=UwKF1Tx"G#
-      - DB_PHPIPAM_NAME=db_phpipam
     ports:
-      - 8081:80
+      - 80:80
     volumes:
-      - /srv/docker_data/phpipam.sca-domain.com:/var/www/html
+      - /srv/docker-data/phpipam:/var/www/html
